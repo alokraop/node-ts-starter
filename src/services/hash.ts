@@ -6,16 +6,27 @@ import { LoggingService } from './logging';
 
 @Service()
 export class HashingService {
-  constructor(private logger: LoggingService) {}
+  constructor(public logger: LoggingService) {}
 
-  withSalt(value: string, defSalt?: string): Promise<HashResult> {
-    const salt = defSalt ?? crypto.randomBytes(16).toString('hex');
+  async withSalt(value: string): Promise<HashResult> {
+    const salt = crypto.randomBytes(16).toString('hex');
+    this.logger.debug(`Hashing ${value} with ${salt}`);
+    const key = await this.createHash(value, salt);
+    return new HashResult(key.toString('hex'), salt);
+  }
+
+  private async createHash(value: string, salt: string): Promise<Buffer> {
     return new Promise((resolve, reject) => {
-      this.logger.debug(`Hashing ${value} with ${salt}`);
-      crypto.scrypt(value, salt, 64, (err, derivedKey) => {
+      crypto.scrypt(value, salt, 64, (err, key) => {
         if (err) reject(err);
-        resolve(new HashResult(salt, derivedKey.toString('hex')));
+        resolve(key);
       });
     });
+  }
+
+  async verify(hash: HashResult, value: string): Promise<boolean> {
+    const aKey = Buffer.from(hash.cipher, 'hex');
+    const key = await this.createHash(value, hash.salt);
+    return crypto.timingSafeEqual(key, aKey);
   }
 }

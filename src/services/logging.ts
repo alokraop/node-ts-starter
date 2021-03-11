@@ -24,7 +24,7 @@ export class LoggingService {
           filename: '%DATE%.log',
           level: config.get<string>('log.level'),
           datePattern: 'Do_MMMM_YYYY',
-          dirname: join(__dirname, '..', '..', '..', 'logs', 'out'),
+          dirname: join(__dirname, '..', '..', 'logs'),
           maxSize: '3m',
           maxFiles: '30d',
         }),

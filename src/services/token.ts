@@ -7,13 +7,12 @@ import { LoggingService } from './logging';
 export class TokenService {
   constructor(private logger: LoggingService) {}
 
-  create(value: any): string {
-    const encoded = JSON.stringify(value);
-    return jwt.sign(encoded, config.get<string>('auth.key'));
+  create(value: string): string {
+    return jwt.sign(value, config.get<string>('auth.key'));
   }
 
   verify(token: any): string | undefined {
-    if (!token || typeof token === 'string') return;
+    if (!token || typeof token !== 'string') return;
     try {
       const accountId = jwt.verify(token, config.get<string>('auth.key'), {});
       if (accountId && typeof accountId == 'string') {

@@ -6,7 +6,7 @@ import { APIError } from './error';
 export function Authenticate(req: Request, res: Response, next: NextFunction) {
   const service = Container.get(TokenService);
   const accountId = service.verify(req.headers.token);
-  if (!accountId) throw new APIError('Invalid/missing token', 403);
+  if (!accountId) throw new APIError('Invalid or missing token', 403);
   res.locals = { accountId };
   next();
 }

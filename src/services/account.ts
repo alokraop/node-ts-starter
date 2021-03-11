@@ -7,14 +7,18 @@ export class AccountService {
   constructor(private dao: AccountDao) {}
 
   async emailExists(email: string): Promise<boolean> {
-    const account = await this.fetch(email);
+    const account = await this.findByEmail(email);
     return !!account;
   }
 
-  async fetch(id: string): Promise<Account> {
-    return this.dao.fetch(id, { password: 0 });
+  async findByEmail(email: string): Promise<Account> {
+    return this.dao.find({ email });
   }
-  
+
+  async fetch(id: string): Promise<Account> {
+    return this.dao.fetch(id, { hashedPassword: 0 });
+  }
+
   async create(account: Account): Promise<any> {
     return this.dao.save(account);
   }

@@ -1,6 +1,7 @@
 {
   "db": {
-    "url": "mongodb://localhost:27017"
+    "url": "mongodb://localhost:27017",
+    "name": "starter"
   },
   "log": {
     "level": "debug"

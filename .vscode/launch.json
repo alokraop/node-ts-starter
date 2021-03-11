@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "API - Blend",
             "preLaunchTask": "compile_ts",
-            "program": "${workspaceFolder}/src/lib/index.ts",
+            "program": "${workspaceFolder}/src/index.ts",
             "cwd": "${workspaceFolder}",
             "protocol": "inspector",
             "outFiles": ["${workspaceFolder}/bin/**/*.js"],

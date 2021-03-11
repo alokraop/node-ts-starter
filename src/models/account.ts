@@ -15,6 +15,7 @@ export class Account {
   @IsDefined()
   id: string;
 
+  @IsEmail()
   email: string;
 
   hashedPassword: HashResult;

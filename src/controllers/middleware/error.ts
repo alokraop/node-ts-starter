@@ -18,10 +18,12 @@ export class APIError extends Error {
   }
 }
 
-export function HandleErrors(err: Error, req: Request, res: Response, next: NextFunction) {
+export function HandleErrors(err: Error | Array<any>, _: Request, res: Response, __: NextFunction) {
   const logger = Container.get(LoggingService);
-  logger.error(`Error message: ${err.message}`);
-  if (err.stack) logger.error(err.stack);
+  if (err instanceof Error) {
+    logger.error(`Error message: ${err.message}`);
+    if (err.stack) logger.error(err.stack);
+  }
 
   if (err instanceof APIError) {
     const error = err as APIError;

@@ -2,14 +2,17 @@ import { ClassConstructor, classToPlain, plainToClass } from 'class-transformer'
 import config from 'config';
 import { Db, FilterQuery, MongoClient } from 'mongodb';
 
-const db = new Promise<Db>((resolve, reject) => {
-  MongoClient.connect(config.get<string>('db.url'), {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-    .then((client) => resolve(client.db(config.get<string>('db.name'))))
-    .catch((e) => reject(e));
-});
+let client: Promise<Db>;
+async function db(): Promise<Db> {
+  if (!client) {
+    client = MongoClient.connect(config.get<string>('db.url'), {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }).then((client) => client.db(config.get<string>('db.name')));
+  }
+
+  return client;
+}
 
 export class BaseDao<T extends Object> {
   constructor(private collection: string, private type: ClassConstructor<T>) {}
@@ -65,6 +68,6 @@ export class BaseDao<T extends Object> {
   }
 
   async init() {
-    return db.then((d) => d.collection(this.collection));
+    return db().then((d) => d.collection(this.collection));
   }
 }

@@ -18,7 +18,7 @@ describe('All auth variations', () => {
   });
 
   test('Good token', () => {
-    const req = getMockReq({ headers: { token: 'good' } });
+    const req = getMockReq({ headers: { authorization: 'Bearer good' } });
     const { res, next } = getMockRes();
     Authenticate(req, res, next);
 

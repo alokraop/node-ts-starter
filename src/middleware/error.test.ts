@@ -1,14 +1,9 @@
+import 'reflect-metadata';
 import { getMockReq, getMockRes } from '@jest-mock/express';
 import { APIError, HandleErrors } from './error';
-import { LoggingService } from '../../services/logging';
-import Container from 'typedi';
 import { ValidationError } from 'class-validator';
-jest.mock('../../services/logging');
 
 describe('Handle all types of API errors', () => {
-  beforeAll(() => {
-    Container.set(LoggingService, new LoggingService());
-  });
   test('Standard error', () => {
     const { res, next } = getMockRes();
     const error = expect.objectContaining({ message: 'Standard stuff' });
@@ -35,9 +30,6 @@ describe('Handle all types of API errors', () => {
 });
 
 describe('Handle other errors', () => {
-  beforeAll(() => {
-    Container.set(LoggingService, new LoggingService());
-  });
 
   test('Validation error', () => {
     const { res, next } = getMockRes();

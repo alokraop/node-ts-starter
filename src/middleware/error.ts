@@ -1,7 +1,6 @@
 import { ValidationError } from 'class-validator';
 import { NextFunction, Request, Response } from 'express';
-import Container from 'typedi';
-import { LoggingService } from '../../services/logging';
+import { logger } from '../util/logger';
 
 export class APIError extends Error {
   status: number;
@@ -19,7 +18,6 @@ export class APIError extends Error {
 }
 
 export function HandleErrors(err: Error | Array<any>, _: Request, res: Response, __: NextFunction) {
-  const logger = Container.get(LoggingService);
   if (err instanceof Error) {
     logger.error(`Error message: ${err.message}`);
     if (err.stack) logger.error(err.stack);

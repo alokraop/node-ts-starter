@@ -5,6 +5,6 @@ import { BaseDao } from './base';
 @Service()
 export class AccountDao extends BaseDao<Account> {
   constructor() {
-    super('accounts', Account);
+    super('accounts');
   }
 }

@@ -1,21 +1,27 @@
-import 'express-async-errors';
 import 'reflect-metadata';
 
-import express from 'express';
-import { setupRoutes } from './router';
+import Container from 'typedi';
+import { createServer } from './server';
+import { ConfigService } from './services/config';
+import { Server } from 'net';
+import { logger } from './util/logger';
 
-export function createWebServer() {
-  const webServer = express();
-  webServer.use(
-    express.json({ limit: '5mb' }),
-    express.urlencoded({
-      limit: '5mb',
-      extended: true,
-    }),
-  );
+let webServer: Server;
 
-  setupRoutes(webServer);
-  webServer.listen(9999, () => console.log('Running on port 9999'));
+function startServer() {
+    const config = Container.get(ConfigService);
+    const server = createServer(config);
+    webServer = server.listen(config.port, () => logger.info(`Running on port ${config.port}`));
 }
 
-createWebServer();
+const onTerminate = () => {
+    webServer.close((err) => {
+        if (err) logger.error(err.message);
+        process.exit(0);
+    });
+};
+
+startServer();
+
+process.on('SIGTERM', onTerminate);
+process.on('SIGINT', onTerminate);

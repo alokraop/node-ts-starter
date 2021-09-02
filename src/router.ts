@@ -1,20 +1,21 @@
-import { Express } from 'express';
-import morgan from 'morgan';
-import Container from 'typedi';
+import { Express, Router } from 'express';
 import { accountRouter } from './controllers/account';
 import { authRouter } from './controllers/auth';
-import { HandleErrors } from './controllers/middleware/error';
-import { Authenticate } from './controllers/middleware/auth';
-import { LoggingService } from './services/logging';
+import { APIError } from './middleware/error';
+import { statusRouter } from './controllers/status';
 
 export function setupRoutes(webServer: Express) {
-  const logger = Container.get(LoggingService);
-  webServer.use(
-    morgan(':method :url :status ":user-agent" :response-time ms', {
-      stream: { write: (log) => logger.info(log) },
-    }),
-  );
-  webServer.use('/auth', authRouter);
-  webServer.use('/accounts', Authenticate, accountRouter);
-  webServer.use(HandleErrors);
+  const v1Router = Router();
+  v1Router.use('/status', statusRouter);
+  v1Router.use('/auth', authRouter);
+  v1Router.use('/accounts', accountRouter);
+  v1Router.use('*', (_, __) => {
+    throw new APIError('This endpoint does not exist on the API', 404);
+  });
+
+  webServer.use('/status', statusRouter);
+  webServer.use('/api/v1', v1Router);
+  webServer.get('*', (_, __) => {
+    throw new APIError('This endpoint does not exist on the API', 404);
+  });
 }

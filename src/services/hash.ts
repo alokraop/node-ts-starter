@@ -2,15 +2,15 @@ import { Service } from 'typedi';
 
 import crypto from 'crypto';
 import { HashResult } from '../models/internal';
-import { LoggingService } from './logging';
+import { logger } from '../util/logger';
 
 @Service()
 export class HashingService {
-  constructor(public logger: LoggingService) {}
+  constructor() {}
 
   async withSalt(value: string): Promise<HashResult> {
     const salt = crypto.randomBytes(16).toString('hex');
-    this.logger.debug(`Hashing ${value} with ${salt}`);
+    logger.debug(`Hashing ${value} with ${salt}`);
     const key = await this.createHash(value, salt);
     return new HashResult(key.toString('hex'), salt);
   }

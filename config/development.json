@@ -1,8 +1,0 @@
-{
-  "log": {
-    "level": "verbose"
-  },
-  "auth": {
-    "key": "dev_key"
-  }
-}

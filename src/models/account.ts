@@ -13,7 +13,7 @@ export class Credentials {
 
 export class Account {
   @IsDefined()
-  id: string;
+  _id: string;
 
   @IsEmail()
   email: string;

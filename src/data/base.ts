@@ -1,73 +1,60 @@
-import { ClassConstructor, classToPlain, plainToClass } from 'class-transformer';
-import config from 'config';
-import { Db, FilterQuery, MongoClient } from 'mongodb';
+import { classToPlain } from 'class-transformer';
+import { Db, FilterQuery, FindOneOptions, MongoClient } from 'mongodb';
+import Container from 'typedi';
+import { ConfigService } from '../services/config';
 
-let client: Promise<Db>;
+let database: Promise<Db>;
+let connection: MongoClient;
 async function db(): Promise<Db> {
-  if (!client) {
-    client = MongoClient.connect(config.get<string>('db.url'), {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }).then((client) => client.db(config.get<string>('db.name')));
-  }
+    if (!database) {
+        const config = Container.get(ConfigService);
+        database = MongoClient.connect(config.dbUrl, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        }).then((c) => {
+            connection = c;
+            return c.db(config.dbName);
+        });
+    }
 
-  return client;
+    return database;
 }
 
-export class BaseDao<T extends Object> {
-  constructor(private collection: string, private type: ClassConstructor<T>) {}
+export async function closeDb() {
+    connection?.close();
+}
 
-  async fetch(id: string, projection: any = {}): Promise<T> {
-    const client = await this.init();
-    const entity = await client.findOne({ id }, { projection });
-    return plainToClass(this.type, entity);
-  }
 
-  async find(query: FilterQuery<any>, projection: any = {}): Promise<T> {
-    const client = await this.init();
-    const entity = client.findOne(query, { projection });
-    return plainToClass(this.type, entity);
-  }
+export class BaseDao<T extends object> {
+    constructor(private collection: string) { }
 
-  async findAll(query: FilterQuery<any>, projection: any = {}): Promise<T[]> {
-    const client = await this.init();
-    const entities = await client.find(query, { projection }).toArray();
-    return entities.map((e) => plainToClass(this.type, e));
-  }
+    async fetch(_id: string, projection: any = {}): Promise<T | null> {
+        const client = await this.init();
+        return client.findOne({ _id }, { projection });
+    }
 
-  async save(document: T): Promise<any> {
-    const client = await this.init();
-    const plain = classToPlain(document);
-    return client.insertOne(plain);
-  }
+    async findFirst(query: FilterQuery<any>, projection: any = {}, sort: any = {}): Promise<T | null> {
+        const client = await this.init();
+        return client.findOne(query, { projection, sort });
+    }
 
-  async replace(id: string, document: any): Promise<any> {
-    const client = await this.init();
-    return client.replaceOne({ id }, document);
-  }
+    async save(document: T): Promise<any> {
+        const client = await this.init();
+        const plain = classToPlain(document);
+        return client.insertOne(plain);
+    }
 
-  async saveAll(documents: T[]): Promise<any> {
-    if (documents.length === 0) return;
-    const client = await this.init();
-    return client.insertMany(documents.map((d) => classToPlain(d)));
-  }
+    async update(query: FilterQuery<any>, update: any): Promise<any> {
+        const client = await this.init();
+        return client.updateOne(query, { $set: update });
+    }
+ 
+    async deleteAll(query: FilterQuery<any>): Promise<any> {
+        const client = await this.init();
+        return client.deleteMany(query);
+    }
 
-  async update(query: FilterQuery<any>, update: any): Promise<any> {
-    const client = await this.init();
-    return client.updateOne(query, { $set: update });
-  }
-
-  async delete(query: FilterQuery<any>): Promise<any> {
-    const client = await this.init();
-    return client.deleteOne(query);
-  }
-
-  async deleteAll(query: FilterQuery<any>): Promise<any> {
-    const client = await this.init();
-    return client.deleteMany(query);
-  }
-
-  async init() {
-    return db().then((d) => d.collection(this.collection));
-  }
+    async init() {
+        return db().then((d) => d.collection(this.collection));
+    }
 }

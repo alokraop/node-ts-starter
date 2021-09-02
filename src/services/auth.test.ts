@@ -1,15 +1,15 @@
+import 'reflect-metadata';
 import { AccountDao } from '../data/accounts';
 import { Account } from '../models/account';
 import { HashResult } from '../models/internal';
 import { AccountService } from './account';
 import { AuthService } from './auth';
+import { ConfigService } from './config';
 import { HashingService } from './hash';
-import { LoggingService } from './logging';
 import { TokenService } from './token';
 jest.mock('./account');
 jest.mock('../data/accounts');
 jest.mock('./hash');
-jest.mock('./logging');
 jest.mock('./token');
 
 const creds = {
@@ -25,10 +25,10 @@ describe('Sign up tests', () => {
     create.mockImplementation((_: string) => 'some-token');
 
     const aService = new AccountService(new AccountDao());
-    const logger = new LoggingService();
-    const token = new TokenService(logger);
-    const hasher = new HashingService(logger);
-    service = new AuthService(aService, logger, token, hasher);
+    const config = new ConfigService();
+    const token = new TokenService(config);
+    const hasher = new HashingService();
+    service = new AuthService(aService, token, hasher);
   });
 
   test('Successful', async () => {
@@ -62,7 +62,7 @@ describe('Sign in tests', () => {
     const findByEmail = AccountService.prototype.findByEmail as jest.Mock;
     findByEmail.mockImplementation((_: string) => {
       return <Account>{
-        id: 'some-id',
+        _id: 'some-id',
         hashedPassword: {
           cipher: 'some-cipher',
           salt: 'some-salt',
@@ -71,10 +71,10 @@ describe('Sign in tests', () => {
     });
 
     const aService = new AccountService(new AccountDao());
-    const logger = new LoggingService();
-    const token = new TokenService(logger);
-    const hasher = new HashingService(logger);
-    service = new AuthService(aService, logger, token, hasher);
+    const config = new ConfigService();
+    const token = new TokenService(config);
+    const hasher = new HashingService();
+    service = new AuthService(aService, token, hasher);
   });
 
   test('Successful', async () => {

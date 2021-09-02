@@ -21,6 +21,10 @@ coverage
 
 # API keys and secrets
 .env
+.env*.local
+
+#firebase key
+assets/firebase-private-key.json
 
 # Dependency directory
 node_modules

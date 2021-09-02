@@ -1,11 +1,10 @@
 import 'reflect-metadata';
 import { Authenticate } from './auth';
 import Container from 'typedi';
-import { TokenService } from '../../services/token';
-import { LoggingService } from '../../services/logging';
+import { TokenService } from '../services/token';
 import { getMockReq, getMockRes } from '@jest-mock/express';
-jest.mock('../../services/token');
-jest.mock('../../services/logging');
+import { ConfigService } from '../services/config';
+jest.mock('../services/token');
 
 describe('All auth variations', () => {
   beforeAll(() => {
@@ -13,7 +12,9 @@ describe('All auth variations', () => {
     verify.mockImplementation((token: string) => {
       return token === 'good' ? 'test-id' : undefined;
     });
-    Container.set(TokenService, new TokenService(new LoggingService()));
+    const config = new ConfigService();
+    const token = new TokenService(config);
+    Container.set(TokenService, token);
   });
 
   test('Good token', () => {

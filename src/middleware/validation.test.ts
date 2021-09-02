@@ -1,12 +1,12 @@
 import { getMockReq, getMockRes } from '@jest-mock/express';
-import { Account } from '../../models/account';
+import { Account } from '../models/account';
 import { Validate } from './validation';
 
 describe('Validating Account', () => {
   test('Valid', async () => {
     const validator = Validate(Account);
     const account = {
-      id: 'some-id',
+      _id: 'some-id',
       email: 'abcd@example.com',
       password: 'password',
     };
@@ -30,7 +30,7 @@ describe('Validating Account', () => {
     const { res, next } = getMockRes();
     await validator(req, res, next);
 
-    const errors = [expect.objectContaining({ property: 'id' })];
+    const errors = [expect.objectContaining({ property: '_id' })];
     expect(next).toBeCalledWith(expect.arrayContaining(errors));
   });
 
@@ -38,7 +38,7 @@ describe('Validating Account', () => {
     const validator = Validate(Account);
     const req = getMockReq({
       body: {
-        id: 'some-id',
+        _id: 'some-id',
         email: 'abcd',
         username: 'some-name',
       },
@@ -67,7 +67,7 @@ describe('Validating Account', () => {
     await validator(req, res, next);
 
     const errors = [
-      expect.objectContaining({ property: 'id' }),
+      expect.objectContaining({ property: '_id' }),
       expect.objectContaining({ property: 'email' }),
     ];
     expect(next).toBeCalledWith(expect.arrayContaining(errors));

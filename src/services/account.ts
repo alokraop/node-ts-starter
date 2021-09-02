@@ -1,5 +1,6 @@
 import { Service } from 'typedi';
 import { AccountDao } from '../data/accounts';
+import { APIError } from '../middleware/error';
 import { Account } from '../models/account';
 
 @Service()
@@ -7,16 +8,24 @@ export class AccountService {
   constructor(private dao: AccountDao) {}
 
   async emailExists(email: string): Promise<boolean> {
-    const account = await this.findByEmail(email);
-    return !!account;
+    try {
+      await this.findByEmail(email);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   async findByEmail(email: string): Promise<Account> {
-    return this.dao.find({ email });
+    const account = await this.dao.findFirst({ email });
+    if (!account) throw new APIError(`No account found for email: ${email}`, 404);
+    return account;
   }
 
   async fetch(id: string): Promise<Account> {
-    return this.dao.fetch(id, { hashedPassword: 0 });
+    const account = await this.dao.fetch(id, { hashedPassword: 0 });
+    if (!account) throw new APIError(`No account found for id: ${id}`, 404);
+    return account;
   }
 
   async create(account: Account): Promise<any> {
@@ -24,6 +33,6 @@ export class AccountService {
   }
 
   async update(account: Account): Promise<any> {
-    return this.dao.update({ id: account.id }, account);
+    return this.dao.update({ _id: account._id }, account);
   }
 }

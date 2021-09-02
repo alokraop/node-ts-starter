@@ -1,21 +1,24 @@
+import 'reflect-metadata';
 import { HashingService } from './hash';
-import { LoggingService } from './logging';
-jest.mock('./logging');
 
 describe('Both ways', () => {
+  let service: HashingService;
+
+  beforeAll(() => {
+    service = new HashingService();
+  });
+
   test('Hashing and verifying', async () => {
-    const hash = new HashingService(new LoggingService());
-    const result = await hash.withSalt('password');
-  
-    const success = await hash.verify(result, 'password');
+    const result = await service.withSalt('password');
+
+    const success = await service.verify(result, 'password');
     expect(success).toBe(true);
   });
 
   test('Failed verification', async () => {
-    const hash = new HashingService(new LoggingService());
-    const result = await hash.withSalt('password');
-  
-    const success = await hash.verify(result, 'else');
+    const result = await service.withSalt('password');
+
+    const success = await service.verify(result, 'else');
     expect(success).toBe(false);
   });
 });

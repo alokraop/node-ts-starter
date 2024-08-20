@@ -6,7 +6,6 @@ import { HandleErrors } from './middleware/error';
 import { setupRoutes } from './router';
 import { ConfigService } from './services/config';
 import morgan from 'morgan';
-import json from 'morgan-json';
 import cors from 'cors';
 import { Authenticate } from './middleware/auth';
 import { logger } from './util/logger';
@@ -30,7 +29,7 @@ export function createServer(config: ConfigService): Express {
 
   // Request logging
   app.use(
-    morgan(json(':method :url :status ":user-agent" :response-time ms'), {
+    morgan(jsonFormat, {
       stream: { write: (log) => logger.info('New Request', JSON.parse(log)) },
     }),
   );
@@ -56,3 +55,14 @@ function Unless(prefix: string, middleware: RequestHandler) {
     }
   };
 }
+
+const jsonFormat: morgan.FormatFn<Request, Response> = (tokens, req, res) => {
+  return JSON.stringify({
+      method: tokens.method(req, res),
+      url: tokens.url(req, res),
+      status: tokens.status(req, res),
+      "user-agent": tokens["user-agent"](req, res),
+      response_time: tokens['response-time'](req, res) + ' ms',
+      message: tokens.message(req, res)
+  });
+};

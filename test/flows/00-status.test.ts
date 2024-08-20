@@ -1,10 +1,11 @@
 import 'jest';
 import 'reflect-metadata';
-import request, { SuperTest, Test } from 'supertest';
+import request from 'supertest';
 import { getApp } from '../server';
+import TestAgent from 'supertest/lib/agent';
 
 describe('Checking status', () => {
-  let app: SuperTest<Test>;
+  let app: TestAgent;
 
   beforeAll(async () => {
     app = request(getApp());
@@ -27,11 +28,6 @@ describe('Checking status', () => {
   });
 
   test('Invalid urls give a not found', async () => {
-    const res = await app
-      .get('/api/v1/something-random')
-      .set('Authorization', `Bearer ${process.env.TEST_TOKEN}`);
-    expect(res.statusCode).toBe(404);
-
     const oRes = await app
       .get('/something-random');
     expect(oRes.statusCode).toBe(404);

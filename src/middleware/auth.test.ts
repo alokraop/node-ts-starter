@@ -23,7 +23,7 @@ describe('All auth variations', () => {
     Authenticate(req, res, next);
 
     expect(res.locals.accountId).toBe('test-id');
-    expect(next).toBeCalledTimes(1);
+    expect(next).toHaveBeenCalledTimes(1);
   });
 
   test('Bad token', () => {
@@ -32,8 +32,12 @@ describe('All auth variations', () => {
     try {
       Authenticate(req, res, next);
     } catch (e) {
-      expect(e.message).toBe('Invalid or missing token');
+      if (e instanceof Error) {
+        expect(e.message).toBe('Invalid or missing token');
+      } else {
+        fail('Invalid error type!');
+      }
     }
-    expect(next).toBeCalledTimes(0);
+    expect(next).toHaveBeenCalledTimes(0);
   });
 });

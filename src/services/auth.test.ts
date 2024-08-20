@@ -46,7 +46,11 @@ describe('Sign up tests', () => {
     try {
       await service.signUp(creds);
     } catch (e) {
-      expect(e.message).toBe('An account with this email exists');
+      if (e instanceof Error) {
+        expect(e.message).toBe('An account with this email exists');
+      } else {
+        fail('Invalid error type!');
+      }
     }
     expect(emailExists).toBeCalledTimes(1);
   });
@@ -84,7 +88,7 @@ describe('Sign in tests', () => {
     const token = await service.signIn(creds);
     expect(token).toBe('some-token');
 
-    expect(verify).toBeCalledTimes(1);
+    expect(verify).toHaveBeenCalledTimes(1);
   });
 
   test('Incorrect password', async () => {
@@ -94,20 +98,28 @@ describe('Sign in tests', () => {
     try {
       await service.signIn(creds);
     } catch (e) {
-      expect(e.message).toBe('The email or password you provided was incorrect');
+      if (e instanceof Error) {
+        expect(e.message).toBe('The email or password you provided was incorrect');
+      } else {
+        fail('Invalid error type!');
+      }
     }
-    expect(verify).toBeCalledTimes(1);
+    expect(verify).toHaveBeenCalledTimes(1);
   });
 
-  test('Non-existant account', async () => {
+  test('Non-existent account', async () => {
     const findByEmail = AccountService.prototype.findByEmail as jest.Mock;
     findByEmail.mockClear();
     findByEmail.mockImplementation((_: string) => undefined);
     try {
       await service.signIn(creds);
     } catch (e) {
-      expect(e.message).toBe("The account you're signing into doesn't exist");
+      if (e instanceof Error) {
+        expect(e.message).toBe("The account you're signing into doesn't exist");
+      } else {
+        fail('Invalid error type!');
+      }
     }
-    expect(findByEmail).toBeCalledTimes(1);
+    expect(findByEmail).toHaveBeenCalledTimes(1);
   });
 });

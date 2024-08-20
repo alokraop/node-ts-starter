@@ -1,8 +1,9 @@
 import 'jest';
 import 'reflect-metadata';
-import request, { SuperTest, Test } from 'supertest';
+import request from 'supertest';
 import { closeDb } from '../../src/data/base';
 import { getApp } from '../server';
+import TestAgent from 'supertest/lib/agent';
 
 const user = {
   email: 'sample@wherever.com',
@@ -10,7 +11,7 @@ const user = {
 };
 
 describe('Signing up and signing in', () => {
-  let app: SuperTest<Test>;
+  let app: TestAgent;
 
   beforeAll(async () => {
     app = request(getApp());

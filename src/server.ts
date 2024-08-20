@@ -28,9 +28,11 @@ export function createServer(config: ConfigService): Express {
   );
 
   // Request logging
+  morgan.token('message', (_, res: Response) => res.locals.description);
   app.use(
     morgan(jsonFormat, {
-      stream: { write: (log) => logger.info('New Request', JSON.parse(log)) },
+      stream: { write: logJson },
+      skip: (req: Request, _) => req.originalUrl.endsWith('status'),
     }),
   );
 
@@ -58,11 +60,16 @@ function Unless(prefix: string, middleware: RequestHandler) {
 
 const jsonFormat: morgan.FormatFn<Request, Response> = (tokens, req, res) => {
   return JSON.stringify({
-      method: tokens.method(req, res),
-      url: tokens.url(req, res),
-      status: tokens.status(req, res),
-      "user-agent": tokens["user-agent"](req, res),
-      response_time: tokens['response-time'](req, res) + ' ms',
-      message: tokens.message(req, res)
+    method: tokens.method(req, res),
+    url: tokens.url(req, res),
+    status: tokens.status(req, res),
+    'user-agent': tokens['user-agent'](req, res),
+    response_time: tokens['response-time'](req, res) + ' ms',
+    message: tokens.message(req, res),
   });
 };
+
+function logJson(log: string) {
+  const { message, ...attributes } = JSON.parse(log);
+  logger.info(message, attributes);
+}

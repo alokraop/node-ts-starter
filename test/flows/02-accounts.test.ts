@@ -1,10 +1,11 @@
 import 'jest';
 import 'reflect-metadata';
-import request, { SuperTest, Test } from 'supertest';
+import request from 'supertest';
 import { closeDb } from '../../src/data/base';
 import { Account } from '../../src/models/account';
 import { fetchUserToken } from '../common/sign_in';
 import { getApp } from '../server';
+import TestAgent from 'supertest/lib/agent';
 
 const user = {
   email: 'sample@wherever.com',
@@ -12,7 +13,7 @@ const user = {
 };
 
 describe('Managing account', () => {
-  let app: SuperTest<Test>;
+  let app: TestAgent;
   let token: string;
   let account = {} as Account;
 
